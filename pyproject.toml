@@ -7,27 +7,8 @@ license = "MIT"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "3.11.*"
-
-# ✅ Required for Buildozer & Android builds
-buildozer = "1.5.0"
-cython = "^3.0.10"
-
-# ✅ App-specific dependency for PDF generation
-fpdf = "^1.7.2"
-
-# ✅ Optional for styling (not required to build)
-yapf = "^0.43.0"
-
-[style]
-based_on_style = "pep8"
-spaces_before_comment = 4
-split_before_logical_operator = true
-
-[tool.yapfignore]
-ignore_patterns = [
-  ".venv/"
-]
+python = "^3.10"
+kivy = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

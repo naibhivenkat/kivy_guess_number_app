@@ -66,6 +66,9 @@ jobs:
 
       - name: Make build script executable
         run: chmod +x build_android_apk.sh
+        
+      - name: Remove pyproject.toml (non-package mode fix)
+        run: rm -f pyproject.toml
 
       - name: Run Docker build
         run: |
