@@ -19,11 +19,14 @@ jobs:
 
     - name: Install dependencies
       run: |
-        sudo apt update
-        sudo apt install -y zip unzip openjdk-17-jdk python3-pip
-        pip install --upgrade pip
-        pip install cython buildozer virtualenv
-        pip install -r requirements.txt
+       sudo apt update
+       sudo apt install -y zip unzip openjdk-17-jdk python3-pip
+       # Add the development tools:
+       sudo apt install -y autoconf automake libtool pkg-config libffi-dev zlib1g-dev
+       pip install --upgrade pip
+       pip install cython buildozer virtualenv
+       pip install -r requirements.txt
+
 
     - name: ✅ Accept Android SDK Licenses
       run: |
