@@ -38,6 +38,7 @@ python3 -m pythonforandroid.toolchain apk \
   --dist_name=guessnumber_dist \
   --android_api=34 \
   --sdk_dir=$ANDROID_SDK_ROOT \
-  --ndk_dir=$ANDROID_NDK_HOME
+  --ndk_dir=$ANDROID_NDK_HOME\
+  --no-byte-compile-python
 
 

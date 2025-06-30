@@ -70,6 +70,10 @@ jobs:
       - name: Remove pyproject.toml (non-package mode fix)
         run: rm -f pyproject.toml
 
+#      - name: Remove NDK Python 2 script
+#        run: |
+#          rm -f $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/share/clang/run-find-all-symbols.py
+
       - name: Run Docker build
         run: |
           docker run --rm -v $PWD:/app -w /app python:3.11-slim bash build_apk.sh
