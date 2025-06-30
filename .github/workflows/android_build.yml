@@ -1,12 +1,12 @@
-name: Build Android APK
+name: Build APK with python-for-android
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
-  build-apk:
+  build:
     runs-on: ubuntu-latest
 
     env:
@@ -15,59 +15,48 @@ jobs:
       ANDROID_NDK_HOME: ${{ github.workspace }}/android-sdk/ndk/25.2.9519653
 
     steps:
-      - name: Checkout project
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install system dependencies
+      - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential zip unzip git curl openjdk-17-jdk python3-dev clang cmake libffi-dev libssl-dev
+          sudo apt update
+          sudo apt install -y zip unzip openjdk-17-jdk python3-dev clang cmake libffi-dev libssl-dev
           python -m pip install --upgrade pip
-          pip install Cython==0.29.36
-
-      - name: Accept Android SDK licenses
+          pip install Cython==0.29.36 python-for-android==2024.1.21
+      
+      - name: Set up Android SDK and NDK
         run: |
           mkdir -p $ANDROID_HOME/cmdline-tools
           cd $ANDROID_HOME/cmdline-tools
           curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -o sdk.zip
-          unzip sdk.zip -d temp
-          mkdir -p latest
-          mv temp/cmdline-tools/* latest/
-          rm -rf temp
+          unzip sdk.zip -d latest
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME --licenses
-
-      - name: Install SDK and NDK
-        run: |
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME \
             "platform-tools" \
-            "platforms;android-33" \
-            "build-tools;33.0.2" \
+            "platforms;android-30" \
+            "build-tools;30.0.3" \
             "ndk;25.2.9519653"
-
-      - name: Build Kivy from source (fix C file errors)
+      - name: Build Kivy from source using Cython (prevents missing .c errors)
         run: |
           git clone --depth 1 https://github.com/kivy/kivy.git
           cd kivy
           python setup.py build_ext --inplace
           cd ..
-
-      - name: Install Buildozer and Python-for-Android
-        run: |
-          pip install buildozer==1.5.0 python-for-android==2024.04.30
-
+          # Now point to this version in your p4a command or setup
       - name: Make build script executable
         run: chmod +x build_android_apk.sh
 
-      - name: Build APK using python-for-android
+      - name: Build APK using python-for-android script
         run: ./build_android_apk.sh
 
-      - name: Upload APK
+      - name: Upload built APK
         uses: actions/upload-artifact@v4
         with:
-          name: guess-the-number-apk
+          name: apk-release
           path: Guess\ the\ Number.apk
