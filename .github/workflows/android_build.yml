@@ -29,6 +29,16 @@ jobs:
           sudo apt install -y zip unzip openjdk-17-jdk python3-dev clang cmake libffi-dev libssl-dev libgl1-mesa-dev
           python -m pip install --upgrade pip
           pip install Cython==0.29.36 python-for-android==2024.1.21
+          
+      - name: Install dependencies for libffi build
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            autoconf \
+            automake \
+            libtool \
+            m4 \
+            texinfo
 
       - name: Setup Android SDK and NDK
         run: |
