@@ -43,7 +43,8 @@ jobs:
           zip \
           unzip \
           patchelf \
-          curl
+          curl \
+          wget # Added wget as an alternative for downloading if curl fails for some reason
 
     - name: Install python-for-android via pip
       run: |
@@ -54,8 +55,6 @@ jobs:
     - name: Setup Android SDK and NDK
       # This step downloads and configures the Android SDK and NDK
       # It creates the necessary directories and sets up environment variables.
-      # We'll use a specific SDK version (e.g., 33) and NDK version (e.g., 25b)
-      # mimicking what Buildozer would do.
       run: |
         ANDROID_SDK_ROOT=$HOME/android-sdk
         ANDROID_NDK_HOME=$HOME/android-ndk
@@ -64,7 +63,10 @@ jobs:
 
         # Download Android SDK Command Line Tools
         SDK_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip"
-        curl -o /tmp/sdk-tools.zip $SDK_TOOLS_URL
+        echo "Downloading SDK Command Line Tools from: $SDK_TOOLS_URL"
+        curl -fL -o /tmp/sdk-tools.zip $SDK_TOOLS_URL || wget -O /tmp/sdk-tools.zip $SDK_TOOLS_URL
+        
+        echo "Unzipping SDK Command Line Tools..."
         unzip /tmp/sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
         mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
 
@@ -73,15 +75,24 @@ jobs:
         echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
 
         # Accept Android SDK licenses
+        echo "Accepting Android SDK licenses..."
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
 
         # Install specific Android SDK platforms and build tools
+        echo "Installing Android SDK platform and build tools..."
         $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platforms;android-33" "build-tools;33.0.0"
 
-        # Download Android NDK
-        NDK_VERSION="25.2.9519653" # NDK 25b
+        # Download Android NDK - Fixed URL and added -fL for robustness, with wget fallback
+        NDK_VERSION="25b" # NDK 25b
         NDK_URL="https://dl.google.com/android/repository/android-ndk-r${NDK_VERSION}-linux.zip"
-        curl -o /tmp/ndk.zip $NDK_URL
+        echo "Downloading Android NDK from: $NDK_URL"
+        curl -fL -o /tmp/ndk.zip $NDK_URL || wget -O /tmp/ndk.zip $NDK_URL
+        
+        echo "Verifying NDK download..."
+        ls -lh /tmp/ndk.zip
+        file /tmp/ndk.zip
+
+        echo "Unzipping NDK..."
         unzip /tmp/ndk.zip -d $ANDROID_NDK_HOME
         mv $ANDROID_NDK_HOME/android-ndk-r${NDK_VERSION} $ANDROID_NDK_HOME/current_ndk
 
@@ -106,8 +117,7 @@ jobs:
         ANDROID_API_LEVEL=21 # Minimum API level
         TARGET_ARCH="arm64-v8a" # Target architecture
 
-        # Create the Android distribution
-        # The `--private .` argument copies the current directory content into the app.
+        echo "Creating p4a distribution..."
         python3 -m p4a create \
             --dist-name guessingapp \
             --sdk-dir "${{ env.ANDROID_HOME }}" \
@@ -123,7 +133,7 @@ jobs:
             --debug \
             --permission INTERNET
 
-        # Build the APK from the created distribution
+        echo "Building APK..."
         python3 -m p4a build \
             --dist-name guessingapp \
             --release \
@@ -140,8 +150,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: android-apk
-        # The p4a build command usually places the APK in the current directory if --output is used.
-        # Otherwise, it might be in `dist/guessingapp/` or a similar structure.
-        # Adjust this path based on where your `p4a build` command outputs the APK.
-        # For the command above, it should be in the current directory.
         path: Guess the Number.apk
