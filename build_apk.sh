@@ -38,7 +38,6 @@ python3 -m pythonforandroid.toolchain apk \
   --dist_name=guessnumber_dist \
   --android_api=34 \
   --sdk_dir=$ANDROID_SDK_ROOT \
-  --ndk_dir=$ANDROID_NDK_HOME \
-  --output "Guess_the_Number.apk"
+  --ndk_dir=$ANDROID_NDK_HOME
 
 

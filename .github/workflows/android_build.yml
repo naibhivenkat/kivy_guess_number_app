@@ -66,14 +66,18 @@ jobs:
 
       - name: Make build script executable
         run: chmod +x build_android_apk.sh
-        
+
       - name: Remove pyproject.toml (non-package mode fix)
         run: rm -f pyproject.toml
 
       - name: Run Docker build
         run: |
           docker run --rm -v $PWD:/app -w /app python:3.11-slim bash build_apk.sh
-            '
+
+      - name: Rename APK
+        run: |
+          find /root/.local/share/python-for-android/dists -name "*.apk" -exec cp {} Guess_the_Number.apk \;
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
