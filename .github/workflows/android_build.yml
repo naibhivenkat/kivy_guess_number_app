@@ -18,48 +18,46 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python 3.11
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y zip unzip openjdk-17-jdk python3-dev clang cmake libffi-dev libssl-dev libgl1-mesa-dev
-          python -m pip install --upgrade pip
-          pip install Cython==0.29.36 python-for-android==2024.1.21
-          
-      - name: Install dependencies for libffi build
+      - name: Install OS Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            autoconf \
-            automake \
-            libtool \
-            m4 \
-            texinfo
+            zip unzip openjdk-17-jdk python3-dev \
+            clang cmake libffi-dev libssl-dev libgl1-mesa-dev \
+            autoconf automake libtool m4 texinfo \
+            git wget
+
+      - name: Install Python Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install Cython==0.29.36 python-for-android==2024.1.21
 
       - name: Setup Android SDK and NDK
         run: |
-          export ANDROID_SDK_ROOT=$HOME/android-sdk
+          export ANDROID_SDK_ROOT=$ANDROID_HOME
           mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
           curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
           unzip sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
           mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
+
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+
           yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
           $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
             "platform-tools" \
-            "platforms;android-33" \
-            "build-tools;33.0.0" \
+            "platforms;android-30" \
+            "build-tools;30.0.3" \
             "ndk;25.2.9519653"
 
-      - name: Build Kivy from source using Cython (prevents missing .c errors)
+      - name: Clone and Build Kivy from Source
         run: |
-          rm -rf kivy  # clean old clone if exists
           git clone --depth 1 https://github.com/kivy/kivy.git
           cd kivy
           python setup.py build_ext --inplace
@@ -68,10 +66,10 @@ jobs:
       - name: Make build script executable
         run: chmod +x build_android_apk.sh
 
-      - name: Build APK using python-for-android script
+      - name: Build APK
         run: ./build_android_apk.sh
 
-      - name: Upload built APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: apk-release
