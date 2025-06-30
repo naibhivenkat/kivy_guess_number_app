@@ -70,32 +70,29 @@ jobs:
       - name: Build APK using python-for-android in Docker
         run: |
           docker run --rm -v ${{ github.workspace }}:/app \
-            -w /app python:3.11-slim bash -c "
+            -w /app python:3.11-slim bash -c '
               set -e
               apt-get update &&
               apt-get install -y zip unzip openjdk-17-jdk wget git \
                 python3-dev clang cmake libffi-dev libssl-dev libgl1-mesa-dev \
                 autoconf automake libtool m4 texinfo &&
 
-              # Install Python dependencies
               pip install --upgrade pip &&
               pip install Cython==0.29.36 python-for-android==2024.1.21 &&
 
-              # Set up Android SDK and NDK
               export ANDROID_SDK_ROOT=/opt/android-sdk &&
-              export ANDROID_NDK_HOME=\$ANDROID_SDK_ROOT/ndk/25.2.9519653 &&
-              mkdir -p \$ANDROID_SDK_ROOT/cmdline-tools &&
+              export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/25.2.9519653 &&
+              mkdir -p $ANDROID_SDK_ROOT/cmdline-tools &&
               wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk-tools.zip &&
-              unzip sdk-tools.zip -d \$ANDROID_SDK_ROOT/cmdline-tools &&
-              mv \$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools \$ANDROID_SDK_ROOT/cmdline-tools/latest &&
-              yes | \$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses &&
-              \$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
-                'platform-tools' \
-                'platforms;android-34' \
-                'build-tools;36.0.0' \
-                'ndk;25.2.9519653' &&
+              unzip sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools &&
+              mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest &&
+              yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses &&
+              $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
+                "platform-tools" \
+                "platforms;android-34" \
+                "build-tools;36.0.0" \
+                "ndk;25.2.9519653" &&
 
-              # Build APK
               python3 -m pythonforandroid.toolchain apk \
                 --private . \
                 --package=com.gtn.app \
@@ -108,6 +105,8 @@ jobs:
                 --sdk_dir=$ANDROID_SDK_ROOT \
                 --ndk_dir=$ANDROID_NDK_HOME \
                 --output "Guess_the_Number.apk"
+            '
+
       
       
       
