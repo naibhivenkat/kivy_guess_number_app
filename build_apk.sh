@@ -27,7 +27,7 @@ $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
   'ndk;25.2.9519653'
 
 echo "== Building APK =="
-python3 python3 -m pythonforandroid.toolchain apk \
+python3 -m pythonforandroid.toolchain apk \
   --private . \
   --package=com.gtn.app \
   --name="Guess the Number" \
@@ -40,4 +40,5 @@ python3 python3 -m pythonforandroid.toolchain apk \
   --sdk_dir=$ANDROID_SDK_ROOT \
   --ndk_dir=$ANDROID_NDK_HOME \
   --output "Guess_the_Number.apk"
+
 
