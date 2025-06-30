@@ -71,16 +71,17 @@ jobs:
         run: |
           docker run --rm -v ${{ github.workspace }}:/app \
             -w /app kivy/python-for-android:latest \
-            p4a apk \
+            bash -c "python3 -m pythonforandroid.toolchain apk \
               --private . \
               --package=com.gtn.app \
-              --name="Guess the Number" \
+              --name='Guess the Number' \
               --version=0.1 \
               --bootstrap=sdl2 \
               --requirements=python3,kivy \
               --arch=arm64-v8a \
               --android_api=34 \
-              --output "Guess the Number.apk"
+              --output 'Guess the Number.apk'"
+      
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
