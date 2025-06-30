@@ -67,20 +67,27 @@ jobs:
       - name: Make build script executable
         run: chmod +x build_android_apk.sh
 
-      - name: Build APK using p4a Docker image
+      - name: Build APK using p4a inside Docker
         run: |
           docker run --rm -v ${{ github.workspace }}:/app \
-            -w /app kivy/python-for-android:latest \
-            bash -c "python3 -m pythonforandroid.toolchain apk \
-              --private . \
-              --package=com.gtn.app \
-              --name='Guess the Number' \
-              --version=0.1 \
-              --bootstrap=sdl2 \
-              --requirements=python3,kivy \
-              --arch=arm64-v8a \
-              --android_api=34 \
-              --output 'Guess the Number.apk'"
+            -w /app python:3.11-slim bash -c "
+              apt-get update &&
+              apt-get install -y zip unzip openjdk-17-jdk \
+                python3-dev clang cmake libffi-dev libssl-dev \
+                libgl1-mesa-dev autoconf automake libtool m4 texinfo git wget &&
+              pip install --upgrade pip &&
+              pip install Cython==0.29.36 python-for-android==2024.1.21 &&
+              python3 -m pythonforandroid.toolchain apk \
+                --private . \
+                --package=com.gtn.app \
+                --name='Guess the Number' \
+                --version=0.1 \
+                --bootstrap=sdl2 \
+                --requirements=python3,kivy \
+                --arch=arm64-v8a \
+                --android_api=34 \
+                --output 'Guess the Number.apk'"
+      
       
 
       - name: Upload APK Artifact
