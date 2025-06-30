@@ -22,17 +22,13 @@ cd ..
 # Build APK
 p4a apk \
   --private . \
-  --package "com.example.guessthenumber" \
-  --name "Guess the Number" \
-  --version "1.0" \
-  --bootstrap sdl2 \
-  --requirements "./kivy" \
-  --android-api 33 \
-  --arch "arm64-v8a" \
-  --output "Guess the Number.apk" \
-  --release \
-  --permission INTERNET \
-  --copy-libs \
-  --sdk-dir "$ANDROID_SDK_ROOT" \
-  --ndk-dir "$ANDROID_NDK_HOME" \
-  --verbose
+  --package=com.gtn.app \
+  --name="Guess the Number" \
+  --version=0.1 \
+  --bootstrap=sdl2 \
+  --requirements=python3,kivy \
+  --arch=arm64-v8a \
+  --sdk_dir=$ANDROID_HOME \
+  --ndk_dir=$ANDROID_HOME/ndk/25.2.9519653 \
+  --android_api=30 \
+  --output "Guess the Number.apk"
