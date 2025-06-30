@@ -1,0 +1,146 @@
+# game.kv
+
+#:kivy 1.0.9
+
+<LoginScreen>:
+    username_input: username_input
+    password_input: password_input
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '20dp'
+        spacing: '10dp'
+        background_color: [0.1, 0.5, 0.6, 1] # A light blue background
+        canvas.before:
+            Color:
+                rgba: self.background_color
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Label:
+            text: "Login"
+            font_size: '32sp'
+            size_hint_y: None
+            height: '60dp'
+            color: 1, 1, 1, 1 # White text
+
+        Label:
+            text: root.login_message
+            font_size: '18sp'
+            size_hint_y: None
+            height: '40dp'
+            color: 1, 1, 0, 1 # Yellow for messages
+
+        TextInput:
+            id: username_input
+            hint_text: "Username"
+            multiline: False
+            size_hint_y: None
+            height: '48dp'
+            padding: '10dp'
+            font_size: '18sp'
+            background_color: 1, 1, 1, 0.9 # Slightly transparent white
+            foreground_color: 0, 0, 0, 1 # Black text
+            cursor_color: 0, 0, 0, 1
+
+        TextInput:
+            id: password_input
+            hint_text: "Password"
+            password: True # Masks the input
+            multiline: False
+            size_hint_y: None
+            height: '48dp'
+            padding: '10dp'
+            font_size: '18sp'
+            background_color: 1, 1, 1, 0.9
+            foreground_color: 0, 0, 0, 1
+            cursor_color: 0, 0, 0, 1
+
+        Button:
+            text: "Login"
+            size_hint_y: None
+            height: '56dp'
+            font_size: '22sp'
+            background_normal: ''
+            background_color: 0.2, 0.7, 0.2, 1 # Green button
+            color: 1, 1, 1, 1 # White text
+            on_press: root.do_login()
+
+        Widget: # Spacer
+            size_hint_y: 1
+
+<GameScreen>:
+    guess_input: guess_input
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '20dp'
+        spacing: '10dp'
+        background_color: [0.2, 0.3, 0.4, 1] # A dark blue background
+        canvas.before:
+            Color:
+                rgba: self.background_color
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Label:
+            text: "Guess the Number!"
+            font_size: '32sp'
+            size_hint_y: None
+            height: '60dp'
+            color: 1, 1, 1, 1 # White text
+
+        Label:
+            text: root.result_label
+            font_size: '22sp'
+            size_hint_y: None
+            height: '80dp'
+            text_size: self.width, None
+            halign: 'center'
+            valign: 'middle'
+            color: 1, 0.8, 0, 1 # Orange for results
+
+        Label:
+            text: root.attempts_label
+            font_size: '18sp'
+            size_hint_y: None
+            height: '40dp'
+            color: 0.8, 0.8, 0.8, 1 # Grey for attempts
+
+        TextInput:
+            id: guess_input
+            hint_text: "Enter your guess (1-100)"
+            input_type: 'number' # Optimizes keyboard for numbers
+            multiline: False
+            size_hint_y: None
+            height: '48dp'
+            padding: '10dp'
+            font_size: '18sp'
+            background_color: 1, 1, 1, 0.9
+            foreground_color: 0, 0, 0, 1
+            cursor_color: 0, 0, 0, 1
+
+        Button:
+            text: "Guess"
+            size_hint_y: None
+            height: '56dp'
+            font_size: '22sp'
+            background_normal: ''
+            background_color: 0.1, 0.6, 0.8, 1 # Blue button
+            color: 1, 1, 1, 1
+            on_press: root.check_guess()
+
+        Button:
+            text: "Reset Game"
+            size_hint_y: None
+            height: '48dp'
+            font_size: '18sp'
+            background_normal: ''
+            background_color: 0.8, 0.2, 0.2, 1 # Red button
+            color: 1, 1, 1, 1
+            on_press: root.reset_game()
+
+        Widget: # Spacer
+            size_hint_y: 1
