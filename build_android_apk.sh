@@ -12,13 +12,6 @@ unset CFLAGS
 unset CXXFLAGS
 unset LDFLAGS
 
-# Install and prepare kivy from source to avoid .c errors
-pip install "cython==0.29.36"
-git clone --depth 1 https://github.com/kivy/kivy.git
-cd kivy
-python setup.py build_ext --inplace
-cd ..
-
 # Build APK
 p4a apk \
   --private . \

@@ -46,13 +46,16 @@ jobs:
               "platforms;android-33" \
               "build-tools;33.0.0" \
               "ndk;25.2.9519653"
+          
+          
       - name: Build Kivy from source using Cython (prevents missing .c errors)
         run: |
+          rm -rf kivy  # clean old clone if exists
           git clone --depth 1 https://github.com/kivy/kivy.git
           cd kivy
           python setup.py build_ext --inplace
           cd ..
-          # Now point to this version in your p4a command or setup
+
       - name: Make build script executable
         run: chmod +x build_android_apk.sh
 
