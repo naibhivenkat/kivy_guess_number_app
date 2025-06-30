@@ -1,110 +1,83 @@
-name: Android Kivy Build (Python-for-Android)
+name: 📱 Build Android APK (No Buildozer)
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
-  build_android_apk:
+  build-apk:
+    name: 🔨 Build APK with python-for-android
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: 🧾 Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.9'
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-    - name: Install p4a dependencies and Java JDK
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential \
-          libtool \
-          libltdl-dev \
-          pkg-config \
-          libsdl2-dev \
-          libsdl2-image-dev \
-          libsdl2-mixer-dev \
-          libsdl2-ttf-dev \
-          zlib1g-dev \
-          libffi-dev \
-          libssl-dev \
-          openjdk-17-jdk \
-          git \
-          zip \
-          unzip \
-          patchelf \
-          curl \
-          wget
+      - name: ⚙️ Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip zip openjdk-17-jdk wget libffi-dev libssl-dev
 
-    - name: Install python-for-android via pip
-      run: |
-        pip install --upgrade pip setuptools
-        pip install cython==0.29.36
-        pip install python-for-android
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: ✅ Accept Android SDK Licenses
+        run: |
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+          echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+          echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
 
-    - name: Setup Android SDK and NDK
-      run: |
-        ANDROID_SDK_ROOT=$HOME/android-sdk
-        ANDROID_NDK_HOME=$HOME/android-ndk
-        mkdir -p $ANDROID_SDK_ROOT
-        mkdir -p $ANDROID_NDK_HOME
+      - name: 📥 Install Android SDK manually
+        run: |
+          SDK_DIR="$HOME/.buildozer/android/platform/android-sdk"
+          mkdir -p "$SDK_DIR/cmdline-tools"
+          cd "$SDK_DIR/cmdline-tools"
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline.zip
+          unzip cmdline.zip
+          mv cmdline-tools latest
+          cd "$SDK_DIR"
+          ln -s cmdline-tools/latest tools
+          yes | "$SDK_DIR/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK_DIR" \
+            "platform-tools" \
+            "platforms;android-30" \
+            "build-tools;34.0.0" \
+            "ndk;25.2.9519653"
 
-        SDK_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip"
-        curl -fL -o /tmp/sdk-tools.zip $SDK_TOOLS_URL || wget -O /tmp/sdk-tools.zip $SDK_TOOLS_URL
-        unzip /tmp/sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
-        mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
+      - name: 📦 Install python-for-android
+        run: |
+          pip install --upgrade pip setuptools
+          pip install python-for-android
 
-        echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-        echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+      - name: 🚀 Run your APK build command
+        run: |
+          echo "🔨 Building APK with python-for-android..."
 
-        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
-        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platforms;android-33" "build-tools;33.0.0"
+          export ANDROIDSDK="$HOME/.buildozer/android/platform/android-sdk"
+          export ANDROIDNDK="$ANDROIDSDK/ndk/25.2.9519653"
+          export ANDROIDAPI=30
+          export ANDROIDMINAPI=21
 
-        NDK_VERSION="25b"
-        NDK_URL="https://dl.google.com/android/repository/android-ndk-r${NDK_VERSION}-linux.zip"
-        curl -fL -o /tmp/ndk.zip $NDK_URL || wget -O /tmp/ndk.zip $NDK_URL
-        unzip /tmp/ndk.zip -d $ANDROID_NDK_HOME
-        mv $ANDROID_NDK_HOME/android-ndk-r${NDK_VERSION} $ANDROID_NDK_HOME/current_ndk
+          p4a apk \
+            --private . \
+            --package=com.venkat.numbergame \
+            --name "NumberGuess" \
+            --version 1.0 \
+            --bootstrap=sdl2 \
+            --sdk_dir="$ANDROIDSDK" \
+            --ndk_dir="$ANDROIDNDK" \
+            --android_api=$ANDROIDAPI \
+            --requirements=python3,kivy,requests,json,sqlite3 \
+            --arch=armeabi-v7a \
+            --output dist/MyApp.apk \
+            --release
 
-        echo "NDK_HOME=$ANDROID_NDK_HOME/current_ndk" >> $GITHUB_ENV
-
-    - name: Create p4a distribution and build APK
-      run: |
-        APP_NAME="Guess the Number"
-        PACKAGE_NAME="com.example.guessthenumber"
-        APP_VERSION="1.0"
-        APP_MAIN_FILE="main.py"
-        APP_REQUIREMENTS="kivy"
-        ANDROID_API_LEVEL=33
-        TARGET_ARCH="arm64-v8a"
-
-        echo "Building APK..."
-        p4a apk \
-          --private . \
-          --package "${PACKAGE_NAME}" \
-          --name "${APP_NAME}" \
-          --version "${APP_VERSION}" \
-          --bootstrap sdl2 \
-          --requirements "${APP_REQUIREMENTS}" \
-          --android-api "${ANDROID_API_LEVEL}" \
-          --arch "${TARGET_ARCH}" \
-          --output "${APP_NAME}.apk" \
-          --release \
-          --permission INTERNET \
-          --copy-libs \
-          --verbose
-
-    - name: Upload APK artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: android-apk
-        path: Guess the Number.apk
+      - name: 📤 Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MyApp-APK
+          path: dist/MyApp.apk
