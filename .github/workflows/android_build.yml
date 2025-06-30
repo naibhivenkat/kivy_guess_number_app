@@ -99,15 +99,15 @@ jobs:
               python3 -m pythonforandroid.toolchain apk \
                 --private . \
                 --package=com.gtn.app \
-                --name='Guess the Number' \
+                --name="Guess the Number" \
                 --version=0.1 \
                 --bootstrap=sdl2 \
                 --requirements=python3,kivy \
-                --arch=arm64-v8a \
+                --arch arm64-v8a \
                 --android_api=34 \
-                --sdk_dir=\$ANDROID_SDK_ROOT \
-                --ndk_dir=\$ANDROID_NDK_HOME \
-                --output 'Guess the Number.apk'"
+                --sdk_dir=$ANDROID_SDK_ROOT \
+                --ndk_dir=$ANDROID_NDK_HOME \
+                --output "Guess_the_Number.apk"
       
       
       
