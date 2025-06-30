@@ -23,5 +23,5 @@ p4a apk \
   --arch=arm64-v8a \
   --sdk_dir=$ANDROID_HOME \
   --ndk_dir=$ANDROID_HOME/ndk/25.2.9519653 \
-  --android_api=30 \
+  --android_api=36 \
   --output "Guess the Number.apk"
