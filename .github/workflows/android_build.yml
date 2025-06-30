@@ -1,81 +1,70 @@
-name: Android Kivy Build (Python-for-Android)
+name: Build Android APK
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  build_android_apk:
+  build-apk:
     runs-on: ubuntu-latest
 
+    env:
+      ANDROID_HOME: ${{ github.workspace }}/android-sdk
+      ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
+      ANDROID_NDK_HOME: ${{ github.workspace }}/android-sdk/ndk/25.2.9519653
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout project
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.9'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-    - name: Install p4a dependencies and Java JDK
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential \
-          libtool \
-          libltdl-dev \
-          pkg-config \
-          libsdl2-dev \
-          libsdl2-image-dev \
-          libsdl2-mixer-dev \
-          libsdl2-ttf-dev \
-          zlib1g-dev \
-          libffi-dev \
-          libssl-dev \
-          openjdk-17-jdk \
-          git \
-          zip \
-          unzip \
-          patchelf \
-          curl \
-          wget
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential zip unzip git curl openjdk-17-jdk python3-dev clang cmake libffi-dev libssl-dev
+          python -m pip install --upgrade pip
+          pip install Cython==0.29.36
 
-    - name: Install python-for-android
-      run: |
-        pip install --upgrade pip setuptools
-        pip install cython==0.29.36
-        pip install python-for-android
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Install Buildozer and Python-for-Android
+        run: |
+          pip install buildozer==1.5.0 python-for-android==2024.04.30
 
-    - name: Setup Android SDK and NDK
-      run: |
-        export ANDROID_SDK_ROOT=$HOME/android-sdk
-        mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-        curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-        unzip sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
-        mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
+      - name: Accept Android SDK licenses
+        run: |
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          cd $ANDROID_HOME/cmdline-tools
+          curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -o sdk.zip
+          unzip sdk.zip -d latest
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME --licenses
 
-        echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-        echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-        echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+      - name: Install SDK and NDK
+        run: |
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME \
+            "platform-tools" \
+            "platforms;android-33" \
+            "build-tools;33.0.2" \
+            "ndk;25.2.9519653"
 
-        yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --licenses
-        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=${ANDROID_SDK_ROOT} \
-          "platform-tools" \
-          "platforms;android-33" \
-          "build-tools;33.0.0" \
-          "ndk;25.2.9519653"
+      - name: Build Kivy from source (fix C file errors)
+        run: |
+          git clone --depth 1 https://github.com/kivy/kivy.git
+          cd kivy
+          python setup.py build_ext --inplace
+          cd ..
 
-    - name: Make build script executable
-      run: chmod +x ./build_android_apk.sh
+      - name: Make build script executable
+        run: chmod +x build_android_apk.sh
 
-    - name: Run APK build script
-      run: ./build_android_apk.sh
+      - name: Build APK using python-for-android
+        run: ./build_android_apk.sh
 
-    - name: Upload APK artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: android-apk
-        path: Guess\ the\ Number.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: guess-the-number-apk
+          path: Guess\ the\ Number.apk
