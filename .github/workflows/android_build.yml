@@ -78,16 +78,18 @@ jobs:
       - name: Prepare Output Folder
         run: mkdir -p apk_output
 
-      - name: Run Docker build
+#      - name: Run Docker build
+#        run: |
+#          mkdir -p apk_output
+#          docker run --rm \
+#            -v $PWD:/app \
+#            -v $PWD/apk_output:/output \
+#            -w /app \
+#            python:3.11-slim \
+#            bash build_android_apk.sh
+      - name: Run Build Script Directly
         run: |
-          mkdir -p apk_output
-          docker run --rm \
-            -v $PWD:/app \
-            -v $PWD/apk_output:/output \
-            -w /app \
-            python:3.11-slim \
-            bash build_android_apk.sh
-      
+          bash build_android_apk.sh
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
