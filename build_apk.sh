@@ -13,6 +13,10 @@ pip install git+https://github.com/kivy/python-for-android@develop
 
 export ANDROID_SDK_ROOT=/opt/android-sdk
 export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/25.2.9519653
+export GRADLE_OPTS="-Xmx4g -Dorg.gradle.daemon=false"
+export ORG_GRADLE_PROJECT_javaOpts="-Xmx4g"
+export JAVA_TOOL_OPTIONS="-Xmx4g"
+
 
 mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
 wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk-tools.zip
