@@ -11,12 +11,15 @@ pip install --upgrade pip
 pip install Cython==0.29.36
 pip install git+https://github.com/kivy/python-for-android@develop
 
+# Set environment variables
 export ANDROID_SDK_ROOT=/opt/android-sdk
+export ANDROID_HOME=$ANDROID_SDK_ROOT
 export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/25.2.9519653
 export GRADLE_OPTS="-Xmx4g -Dorg.gradle.daemon=false"
 export ORG_GRADLE_PROJECT_javaOpts="-Xmx4g"
 export JAVA_TOOL_OPTIONS="-Xmx4g"
 
+echo "== Setting up Android SDK =="
 mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
 wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk-tools.zip
 unzip -q sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
@@ -24,10 +27,10 @@ mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools
 
 yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
 $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
-  'platform-tools' \
-  'platforms;android-34' \
-  'build-tools;36.0.0' \
-  'ndk;25.2.9519653'
+  "platform-tools" \
+  "platforms;android-34" \
+  "build-tools;36.0.0" \
+  "ndk;25.2.9519653"
 
 echo "== Building APK =="
 mkdir -p /output
@@ -45,4 +48,4 @@ python3 -m pythonforandroid.toolchain apk \
   --sdk_dir=$ANDROID_SDK_ROOT \
   --ndk_dir=$ANDROID_NDK_HOME \
   --no-byte-compile-python \
-  ---output /output/Guess_the_Number.apk
+  --output /output/Guess_the_Number.apk
