@@ -70,26 +70,28 @@ jobs:
         run: rm -f pyproject.toml
 
       - name: Make build script executable
-        run: chmod +x build_android_apk.sh
+        run: |
+          cat build_android_apk.sh   # 👈 Check script contents in logs
+          chmod +x build_android_apk.sh
+      
 
       - name: Prepare Output Folder
         run: mkdir -p apk_output
 
       - name: Run Docker build
         run: |
+          mkdir -p apk_output
           docker run --rm \
             -v $PWD:/app \
             -v $PWD/apk_output:/output \
             -w /app \
-            python:3.11-slim bash build_android_apk.sh
-
-      - name: Move APK from Docker volume to workspace
-        run: |
-          ls -l apk_output
-          mv apk_output/Guess_the_Number.apk "Guess the Number.apk"
+            python:3.11-slim \
+            bash build_android_apk.sh
+      
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: apk-release
-          path: Guess\ the\ Number.apk
+          path: apk_output/Guess_the_Number.apk
+      
