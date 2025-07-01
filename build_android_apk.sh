@@ -4,13 +4,13 @@ set -e
 echo "== Installing dependencies =="
 apt-get update
 apt-get install -y \
-  openjdk-11-jdk libz-dev libncurses5 libstdc++6 \
+  openjdk-17-jdk libz-dev libncurses5 libstdc++6 \
   zip unzip wget git python3-dev clang cmake \
   libffi-dev libssl-dev libgl1-mesa-dev autoconf automake \
   libtool m4 texinfo pkg-config curl
 
 # Set Java home
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 export PATH="$JAVA_HOME/bin:$PATH"
 
 # Install Python tools
