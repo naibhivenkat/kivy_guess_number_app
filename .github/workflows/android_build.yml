@@ -94,4 +94,3 @@ jobs:
         with:
           name: apk-release
           path: apk_output/Guess_the_Number.apk
-      
