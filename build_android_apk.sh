@@ -5,27 +5,24 @@ echo "== Installing dependencies =="
 apt-get update
 apt-get install -y zip unzip openjdk-17-jdk wget git \
   python3-dev clang cmake libffi-dev libssl-dev libgl1-mesa-dev \
-  autoconf automake libtool m4 texinfo
+  autoconf automake libtool m4 texinfo pkg-config curl
 
 pip install --upgrade pip
 pip install Cython==0.29.36
 pip install git+https://github.com/kivy/python-for-android@develop
 
-# Set environment variables
 export ANDROID_SDK_ROOT=/opt/android-sdk
 export ANDROID_HOME=$ANDROID_SDK_ROOT
 export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/25.2.9519653
-export GRADLE_OPTS="-Xmx4g -Dorg.gradle.daemon=false"
-export ORG_GRADLE_PROJECT_javaOpts="-Xmx4g"
-export JAVA_TOOL_OPTIONS="-Xmx4g"
 
 echo "== Setting up Android SDK =="
 mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk-tools.zip
+curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -o sdk-tools.zip
 unzip -q sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
 mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
 
 yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
+
 $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
   "platform-tools" \
   "platforms;android-34" \
@@ -33,10 +30,8 @@ $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
   "ndk;25.2.9519653"
 
 echo "== Building APK =="
-mkdir -p /output
-
 python3 -m pythonforandroid.toolchain apk \
-  --private . \
+  --private /app \
   --package=com.gtn.app \
   --name="Guess the Number" \
   --version=0.1 \
@@ -50,12 +45,11 @@ python3 -m pythonforandroid.toolchain apk \
   --no-byte-compile-python
 
 echo "== Locating generated APK =="
-APK_PATH=$(find /root/.local/share/python-for-android/dists/guessnumber_dist/bin -name "*.apk" | head -n 1)
+APK_PATH=$(find ~/.local/share/python-for-android/dists/guessnumber_dist/ -name "*.apk" | head -n 1)
 
 if [[ -f "$APK_PATH" ]]; then
-  echo "== APK found: $APK_PATH"
+  echo "✅ APK built at $APK_PATH"
   cp "$APK_PATH" /output/Guess_the_Number.apk
-  echo "✅ APK copied to /output/Guess_the_Number.apk"
 else
   echo "❌ APK not found!"
   exit 1

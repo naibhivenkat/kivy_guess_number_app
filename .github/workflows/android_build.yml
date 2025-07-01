@@ -87,9 +87,15 @@ jobs:
 #            -w /app \
 #            python:3.11-slim \
 #            bash build_android_apk.sh
-      - name: Run Build Script Directly
+      - name: Run Docker build
         run: |
-          bash build_android_apk.sh
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            -v ${{ github.workspace }}/apk_output:/output \
+            -w /app \
+            python:3.11-slim \
+            bash /app/build_android_apk.sh
+      
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
