@@ -13,6 +13,7 @@ jobs:
       ANDROID_HOME: ${{ github.workspace }}/android-sdk
       ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
       ANDROID_NDK_HOME: ${{ github.workspace }}/android-sdk/ndk/25.2.9519653
+      GRADLE_OPTS: "-Xmx4g -Dorg.gradle.daemon=false"
 
     steps:
       - name: Checkout code
