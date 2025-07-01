@@ -17,7 +17,6 @@ export GRADLE_OPTS="-Xmx4g -Dorg.gradle.daemon=false"
 export ORG_GRADLE_PROJECT_javaOpts="-Xmx4g"
 export JAVA_TOOL_OPTIONS="-Xmx4g"
 
-
 mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
 wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk-tools.zip
 unzip -q sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
@@ -31,6 +30,8 @@ $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
   'ndk;25.2.9519653'
 
 echo "== Building APK =="
+mkdir -p /output
+
 python3 -m pythonforandroid.toolchain apk \
   --private . \
   --package=com.gtn.app \
@@ -42,7 +43,6 @@ python3 -m pythonforandroid.toolchain apk \
   --dist_name=guessnumber_dist \
   --android_api=34 \
   --sdk_dir=$ANDROID_SDK_ROOT \
-  --ndk_dir=$ANDROID_NDK_HOME\
-  --no-byte-compile-python
-
-
+  --ndk_dir=$ANDROID_NDK_HOME \
+  --no-byte-compile-python \
+  ---output /output/Guess_the_Number.apk

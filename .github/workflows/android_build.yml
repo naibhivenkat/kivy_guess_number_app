@@ -17,7 +17,6 @@ jobs:
       ORG_GRADLE_PROJECT_javaOpts: "-Xmx4g"
       JAVA_TOOL_OPTIONS: "-Xmx4g"
 
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -35,7 +34,6 @@ jobs:
             clang cmake libffi-dev libssl-dev libgl1-mesa-dev \
             autoconf automake libtool pkg-config m4 texinfo \
             git wget
-          
 
       - name: Install Python Dependencies
         run: |
@@ -44,22 +42,22 @@ jobs:
 
       - name: Setup Android SDK and NDK
         run: |
-            export ANDROID_SDK_ROOT=$ANDROID_HOME
-            mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-            curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-            unzip sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
-            mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
+          export ANDROID_SDK_ROOT=$ANDROID_HOME
+          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
+          curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
+          mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
 
-            echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-            echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-            echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
 
-            yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
-            $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
-              "platform-tools" \
-              "platforms;android-34" \
-              "build-tools;36.0.0" \
-              "ndk;25.2.9519653"
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
+            "platform-tools" \
+            "platforms;android-34" \
+            "build-tools;36.0.0" \
+            "ndk;25.2.9519653"
 
       - name: Clone and Build Kivy from Source
         run: |
@@ -68,23 +66,27 @@ jobs:
           python setup.py build_ext --inplace
           cd ..
 
-      - name: Make build script executable
-        run: chmod +x build_android_apk.sh
-
       - name: Remove pyproject.toml (non-package mode fix)
         run: rm -f pyproject.toml
 
-#      - name: Remove NDK Python 2 script
-#        run: |
-#          rm -f $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/share/clang/run-find-all-symbols.py
+      - name: Make build script executable
+        run: chmod +x build_android_apk.sh
+
+      - name: Prepare Output Folder
+        run: mkdir -p apk_output
 
       - name: Run Docker build
         run: |
-          docker run --rm -v $PWD:/app -w /app python:3.11-slim bash build_apk.sh
+          docker run --rm \
+            -v $PWD:/app \
+            -v $PWD/apk_output:/output \
+            -w /app \
+            python:3.11-slim bash build_android_apk.sh
 
-      - name: Rename APK
+      - name: Move APK from Docker volume to workspace
         run: |
-          find /root/.local/share/python-for-android/dists -name "*.apk" -exec cp {} Guess_the_Number.apk \;
+          ls -l apk_output
+          mv apk_output/Guess_the_Number.apk "Guess the Number.apk"
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
