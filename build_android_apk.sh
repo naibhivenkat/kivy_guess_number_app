@@ -11,6 +11,7 @@ pip install --upgrade pip
 pip install Cython==0.29.36
 pip install git+https://github.com/kivy/python-for-android@develop
 
+# Set environment variables
 export ANDROID_SDK_ROOT=/opt/android-sdk
 export ANDROID_HOME=$ANDROID_SDK_ROOT
 export ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/25.2.9519653
@@ -48,5 +49,14 @@ python3 -m pythonforandroid.toolchain apk \
   --ndk_dir=$ANDROID_NDK_HOME \
   --no-byte-compile-python
 
-echo "== Copying APK to /output =="
-cp /root/.local/share/python-for-android/dists/guessnumber_dist/bin/*.apk /output/Guess_the_Number.apk
+echo "== Locating generated APK =="
+APK_PATH=$(find /root/.local/share/python-for-android/dists/guessnumber_dist/bin -name "*.apk" | head -n 1)
+
+if [[ -f "$APK_PATH" ]]; then
+  echo "== APK found: $APK_PATH"
+  cp "$APK_PATH" /output/Guess_the_Number.apk
+  echo "✅ APK copied to /output/Guess_the_Number.apk"
+else
+  echo "❌ APK not found!"
+  exit 1
+fi
