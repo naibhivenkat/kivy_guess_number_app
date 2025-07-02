@@ -86,6 +86,9 @@ jobs:
 #      - name: Rename APK
 #        run: |
 #          find /root/.local/share/python-for-android/dists -name "*.apk" -exec cp {} Guess_the_Number.apk \;
+      
+      - name: Debug APK Output
+        run: ls -lh
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

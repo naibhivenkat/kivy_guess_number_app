@@ -59,9 +59,14 @@ python3 -m pythonforandroid.toolchain apk \
   --ndk_dir=$ANDROID_NDK_HOME \
   --no-byte-compile-python
 
+#echo "== Copying APK to project root =="
+#APK_PATH=$(find /root/.local/share/python-for-android/dists/ -name "*.apk" | head -n 1)
+#echo "Found APK: $APK_PATH"
+#cp "$APK_PATH" /app/Guess_the_Number.apk
 echo "== Copying APK to project root =="
 APK_PATH=$(find /root/.local/share/python-for-android/dists/ -name "*.apk" | head -n 1)
 echo "Found APK: $APK_PATH"
 cp "$APK_PATH" /app/Guess_the_Number.apk
+ls -lh /app
 
 
