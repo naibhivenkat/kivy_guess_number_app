@@ -82,13 +82,23 @@ jobs:
       - name: Debug APK Output
         run: ls -lh
 
-      - name: 📤 Upload APK directly
-        uses: actions/upload-artifact@v4
+# try to add this
+      - name: 📤 Upload APK to GitHub Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: Guess_the_Number.apk
-          path: Guess_the_Number.apk
-          if-no-files-found: error
-     
+          files: Guess_the_Number.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+## earlier succesful build --> save apk once build success -2 #62
+#      - name: 📤 Upload APK directly
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: Guess_the_Number.apk
+#          path: Guess_the_Number.apk
+#          if-no-files-found: error
+
 
 
 
