@@ -67,6 +67,7 @@ echo "== Copying APK to project root =="
 APK_PATH=$(find /root/.local/share/python-for-android/dists/ -name "*.apk" | head -n 1)
 echo "Found APK: $APK_PATH"
 cp "$APK_PATH" /app/Guess_the_Number.apk
+cp "$APK_PATH" /app/guess_the_number.apk
 ls -lh /app
 
 

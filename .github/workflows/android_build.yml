@@ -75,18 +75,10 @@ jobs:
       - name: Remove pyproject.toml (non-package mode fix)
         run: rm -f pyproject.toml
 
-#      - name: Remove NDK Python 2 script
-#        run: |
-#          rm -f $ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64/share/clang/run-find-all-symbols.py
-
       - name: Run Docker build
         run: |
           docker run --rm -v $PWD:/app -w /app python:3.11-slim bash build_apk.sh
 
-#      - name: Rename APK
-#        run: |
-#          find /root/.local/share/python-for-android/dists -name "*.apk" -exec cp {} Guess_the_Number.apk \;
-      
       - name: Debug APK Output
         run: ls -lh
 
@@ -94,5 +86,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: apk-release
-          path: Guess\ the\ Number.apk
+          path: Guess_the_Number.apk
+
+      - name: Upload APK Artifact-2
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-release
+          path: guess_the_number.apk
+
 
