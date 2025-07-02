@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - "**"
-    tags:
-      - "*"
   workflow_dispatch:
 
 jobs:
@@ -19,6 +17,7 @@ jobs:
       GRADLE_OPTS: "-Xmx4g -Dorg.gradle.daemon=false"
       ORG_GRADLE_PROJECT_javaOpts: "-Xmx4g"
       JAVA_TOOL_OPTIONS: "-Xmx4g"
+
 
     steps:
       - name: Checkout code
@@ -50,11 +49,9 @@ jobs:
           curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
           unzip sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
           mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
-
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
-
           yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
           $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
             "platform-tools" \
@@ -69,6 +66,9 @@ jobs:
           python setup.py build_ext --inplace
           cd ..
 
+      - name: Make build script executable
+        run: chmod +x build_android_apk.sh
+
       - name: Remove pyproject.toml (non-package mode fix)
         run: rm -f pyproject.toml
 
@@ -79,17 +79,9 @@ jobs:
       - name: Debug APK Output
         run: ls -lh
 
-      - name: 📤 Upload APK as Artifact
+      - name: 📤 Upload APK directly
         uses: actions/upload-artifact@v4
         with:
           name: Guess_the_Number.apk
           path: Guess_the_Number.apk
           if-no-files-found: error
-
-      - name: 📦 Upload APK to GitHub Release (on tag only)
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
-        with:
-          files: Guess_the_Number.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
