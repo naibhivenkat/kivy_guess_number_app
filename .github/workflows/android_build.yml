@@ -83,9 +83,9 @@ jobs:
         run: |
           docker run --rm -v $PWD:/app -w /app python:3.11-slim bash build_apk.sh
 
-      - name: Rename APK
-        run: |
-          find /root/.local/share/python-for-android/dists -name "*.apk" -exec cp {} Guess_the_Number.apk \;
+#      - name: Rename APK
+#        run: |
+#          find /root/.local/share/python-for-android/dists -name "*.apk" -exec cp {} Guess_the_Number.apk \;
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
