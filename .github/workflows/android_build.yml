@@ -2,7 +2,8 @@ name: Build APK with python-for-android
 
 on:
   push:
-    branches: [main]
+    branches:
+      - "**"
   workflow_dispatch:
 
 jobs:
@@ -16,6 +17,7 @@ jobs:
       GRADLE_OPTS: "-Xmx4g -Dorg.gradle.daemon=false"
       ORG_GRADLE_PROJECT_javaOpts: "-Xmx4g"
       JAVA_TOOL_OPTIONS: "-Xmx4g"
+
 
     steps:
       - name: Checkout code
@@ -47,11 +49,9 @@ jobs:
           curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
           unzip sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
           mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
-
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
           echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
-
           yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
           $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
             "platform-tools" \
@@ -66,39 +66,21 @@ jobs:
           python setup.py build_ext --inplace
           cd ..
 
+      - name: Make build script executable
+        run: chmod +x build_android_apk.sh
+
       - name: Remove pyproject.toml (non-package mode fix)
         run: rm -f pyproject.toml
 
-      - name: Make build script executable
-        run: |
-          cat build_android_apk.sh   # 👈 Check script contents in logs
-          chmod +x build_android_apk.sh
-      
-
-      - name: Prepare Output Folder
-        run: mkdir -p apk_output
-
-#      - name: Run Docker build
-#        run: |
-#          mkdir -p apk_output
-#          docker run --rm \
-#            -v $PWD:/app \
-#            -v $PWD/apk_output:/output \
-#            -w /app \
-#            python:3.11-slim \
-#            bash build_android_apk.sh
       - name: Run Docker build
         run: |
-          docker run --rm \
-            --user root \
-            -v ${{ github.workspace }}:/app \
-            -v ${{ github.workspace }}/apk_output:/output \
-            -w /app \
-            python:3.11-slim \
-            bash /app/build_android_apk.sh
+          docker run --rm -v $PWD:/app -w /app python:3.11-slim bash build_apk.sh
+      - name: Debug APK Output
+        run: ls -lh
 
-      - name: Upload APK Artifact
+      - name: 📤 Upload APK directly
         uses: actions/upload-artifact@v4
         with:
-          name: apk-release
-          path: apk_output/Guess_the_Number.apk
+          name: Guess_the_Number.apk
+          path: Guess_the_Number.apk
+          if-no-files-found: error
