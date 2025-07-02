@@ -29,7 +29,7 @@ yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
 $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
   "platform-tools" \
   "platforms;android-34" \
-  "build-tools;36.0.0" \
+  "build-tools;34.0.0" \
   "ndk;25.2.9519653"
 
 echo "== Building APK =="
