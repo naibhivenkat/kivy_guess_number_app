@@ -1,4 +1,3 @@
-# Dockerfile
 FROM python:3.10-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -16,7 +15,6 @@ RUN apt-get update && apt-get install -y \
     pip install --no-cache-dir buildozer cython==0.29.36 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user
 RUN useradd -ms /bin/bash builder
 USER builder
 

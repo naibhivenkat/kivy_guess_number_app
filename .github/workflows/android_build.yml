@@ -109,6 +109,9 @@ jobs:
       - name: 🧼 Clean Old Builds
         run: rm -rf .buildozer bin
 
+      - name: 🔓 Set folder permissions for Docker user
+        run: sudo chmod -R a+rw .
+
       - name: ⚙️ Build APK using Custom Docker Image (non-root)
         run: |
           docker run --rm -v $PWD:/home/builder/app custom-buildozer \
