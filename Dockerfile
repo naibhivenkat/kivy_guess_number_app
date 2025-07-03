@@ -3,7 +3,7 @@ FROM python:3.10-slim
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
 
-# Install required system packages
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     git zip unzip openjdk-17-jdk wget curl \
     python3-dev build-essential \
@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
     pip install --no-cache-dir buildozer cython==0.29.36 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Android SDK
+# Install Android SDK and accept licenses
 RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
     curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip && \
     unzip sdk-tools.zip -d ${ANDROID_SDK_ROOT}/cmdline-tools && \
@@ -27,10 +27,10 @@ RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
         "platforms;android-34" \
         "build-tools;36.0.0"
 
-# Add SDK paths to environment
-ENV PATH="${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${PATH}"
+ENV PATH="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROID_SDK_ROOT}/platform-tools:${PATH}"
 
-# Create a non-root user and switch to it
+# Create non-root user
 RUN useradd -ms /bin/bash builder
 USER builder
+
 WORKDIR /home/builder/app
