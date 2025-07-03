@@ -130,12 +130,23 @@ jobs:
       - name: 🐳 Build Docker Image with Buildozer + ANT + SDK Licenses
         run: docker build -t custom-buildozer .
 
-      - name: ⚙️ Build APK inside Docker
+#      - name: ⚙️ Build APK inside Docker
+#        run: |
+#          docker run --rm -v $PWD:/home/builder/app custom-buildozer \
+#            bash -c "
+#              cd /home/builder/app &&
+#              buildozer -v android release"
+
+      - name: ⚙️ Build APK inside Docker (with runtime sdkmanager fix)
         run: |
           docker run --rm -v $PWD:/home/builder/app custom-buildozer \
             bash -c "
               cd /home/builder/app &&
+              mkdir -p /home/builder/.buildozer/android/platform/android-sdk/cmdline-tools &&
+              ln -s /home/builder/.buildozer/android/platform/android-sdk/cmdline-tools/latest \
+                    /home/builder/.buildozer/android/platform/android-sdk/tools &&
               buildozer -v android release"
+
 
       - name: 📦 Upload APK Artifact
         uses: actions/upload-artifact@v4
