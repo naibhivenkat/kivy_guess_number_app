@@ -137,16 +137,18 @@ jobs:
 #              cd /home/builder/app &&
 #              buildozer -v android release"
 
-      - name: ⚙️ Build APK inside Docker (with runtime sdkmanager fix)
+      - name: ⚙️ Build APK inside Docker (runtime sdkmanager symlink fix)
         run: |
           docker run --rm -v $PWD:/home/builder/app custom-buildozer \
             bash -c "
               cd /home/builder/app &&
+              TOOLS_PATH=/home/builder/.buildozer/android/platform/android-sdk/tools &&
+              if [ -e \$TOOLS_PATH ]; then rm -rf \$TOOLS_PATH; fi &&
               mkdir -p /home/builder/.buildozer/android/platform/android-sdk/cmdline-tools &&
-              ln -s /home/builder/.buildozer/android/platform/android-sdk/cmdline-tools/latest \
-                    /home/builder/.buildozer/android/platform/android-sdk/tools &&
+              ln -s /home/builder/.buildozer/android/platform/android-sdk/cmdline-tools/latest \$TOOLS_PATH &&
               buildozer -v android release"
-
+      
+      
 
       - name: 📦 Upload APK Artifact
         uses: actions/upload-artifact@v4
