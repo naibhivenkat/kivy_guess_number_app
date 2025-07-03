@@ -40,10 +40,16 @@ RUN useradd -ms /bin/bash builder && \
 
 USER builder
 
-# 🧩 Manually accept licenses where Buildozer installs the SDK
+# Accept Android SDK licenses where Buildozer expects them
 RUN mkdir -p /home/builder/.buildozer/android/platform/android-sdk/licenses && \
     echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > /home/builder/.buildozer/android/platform/android-sdk/licenses/android-sdk-license && \
     echo "d56f5187479451eabf01fb78af6dfcb131a6481e" >> /home/builder/.buildozer/android/platform/android-sdk/licenses/android-sdk-license && \
     echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > /home/builder/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
 
+# Symlink tools/bin/sdkmanager to cmdline-tools/latest for Buildozer compatibility
+RUN mkdir -p /home/builder/.buildozer/android/platform/android-sdk/cmdline-tools && \
+    ln -s /home/builder/.buildozer/android/platform/android-sdk/cmdline-tools/latest \
+          /home/builder/.buildozer/android/platform/android-sdk/tools
+
 WORKDIR /home/builder/app
+
