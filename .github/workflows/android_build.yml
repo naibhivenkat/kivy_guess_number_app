@@ -86,7 +86,9 @@
 #          name: Guess_the_Number.apk
 #          path: Guess_the_Number.apk
 #          if-no-files-found: error
-name: Build APK with Buildozer in Docker
+
+
+name: Build Kivy APK in Docker (working)
 
 on:
   push:
@@ -104,16 +106,16 @@ jobs:
       - name: 🧹 Clean Workspace
         run: rm -rf .buildozer bin
 
-      - name: 🛠️ Build APK with alternative Buildozer image
+      - name: 🛠️ Build APK using josephcrowell/kivy-buildozer
         run: |
           docker run --rm -v $PWD:/home/user/hostcwd \
-            ghcr.io/cmdv/buildozer:latest \
+            josephcrowell/kivy-buildozer \
             bash -c "
               cd /home/user/hostcwd &&
               buildozer android clean &&
               buildozer -v android release"
 
-      - name: 📦 Upload APK Artifact
+      - name: 📦 Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Guess_The_Number_Release
