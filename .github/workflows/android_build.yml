@@ -111,20 +111,21 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: 🐳 Disable BuildKit
+      - name: 🐳 Disable Docker BuildKit
         run: echo 'DOCKER_BUILDKIT=0' >> $GITHUB_ENV
 
       - name: 🐳 Pull Buildozer Docker image
-        run: docker pull kivy/buildozer:stable
+        run: docker pull kivy/buildozer:python3.10
 
-      - name: 🐳 Build APK using Buildozer
+      - name: 🐳 Build APK using Buildozer Docker
         run: |
           docker run --rm -v $PWD:/home/user/hostcwd \
-            kivy/buildozer:stable \
+            kivy/buildozer:python3.10 \
             bash -c "
               cd /home/user/hostcwd &&
               buildozer android clean &&
               buildozer -v android release"
+      
 
       - name: 📦 Upload release APK
         uses: actions/upload-artifact@v4
