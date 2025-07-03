@@ -87,7 +87,7 @@
 #          path: Guess_the_Number.apk
 #          if-no-files-found: error
 
-name: Build APK with Buildozer (Docker)
+name: Build APK with Buildozer in Docker
 
 on:
   push:
@@ -102,25 +102,21 @@ jobs:
       - name: 📥 Checkout Code
         uses: actions/checkout@v3
 
-      - name: 🧹 Clean workspace
-        run: |
-          rm -rf .buildozer bin
+      - name: 🧹 Clean Workspace
+        run: rm -rf .buildozer bin
 
-      - name: 🐍 Set up Python (for internal tools if needed)
+      - name: 🐍 Set Up Python (Optional)
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: 🐳 Disable Docker BuildKit (fixes cacheconfig error)
-        run: echo "DOCKER_BUILDKIT=0" >> $GITHUB_ENV
+      - name: 🐳 Pull Buildozer Docker Image (disable BuildKit)
+        run: DOCKER_BUILDKIT=0 docker pull kivy/buildozer
 
-      - name: 🐳 Pull Buildozer Docker Image
-        run: docker pull kivy/buildozer:latest
-
-      - name: 🛠️ Build APK inside Docker
+      - name: 🛠️ Build APK Inside Docker (disable BuildKit)
         run: |
-          docker run --rm -v $PWD:/home/user/hostcwd \
-            kivy/buildozer:latest \
+          DOCKER_BUILDKIT=0 docker run --rm -v $PWD:/home/user/hostcwd \
+            kivy/buildozer \
             bash -c "
               cd /home/user/hostcwd &&
               buildozer android clean &&
