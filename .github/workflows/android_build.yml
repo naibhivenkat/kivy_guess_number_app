@@ -86,7 +86,6 @@
 #          name: Guess_the_Number.apk
 #          path: Guess_the_Number.apk
 #          if-no-files-found: error
-
 name: Build APK with Buildozer in Docker
 
 on:
@@ -105,15 +104,10 @@ jobs:
       - name: 🧹 Clean Workspace
         run: rm -rf .buildozer bin
 
-      - name: 🐍 Set Up Python (optional)
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: 🛠️ Build APK Inside Docker (no explicit pull)
+      - name: 🛠️ Build APK with alternative Buildozer image
         run: |
-          DOCKER_BUILDKIT=0 docker run --rm -v $PWD:/home/user/hostcwd \
-            kivy/buildozer \
+          docker run --rm -v $PWD:/home/user/hostcwd \
+            ghcr.io/cmdv/buildozer:latest \
             bash -c "
               cd /home/user/hostcwd &&
               buildozer android clean &&
