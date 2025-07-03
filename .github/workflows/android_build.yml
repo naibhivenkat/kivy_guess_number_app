@@ -88,7 +88,7 @@
 #          if-no-files-found: error
 
 
-name: Build APK with Buildozer (Custom Docker)
+name: Build APK with Buildozer (Docker)
 
 on:
   push:
@@ -103,21 +103,20 @@ jobs:
       - name: 📥 Checkout Code
         uses: actions/checkout@v3
 
+      - name: 🔓 Set folder permissions for Docker user
+        run: sudo chmod -R a+rw .
+
       - name: 🐳 Build Docker Image with Buildozer
         run: docker build -t custom-buildozer .
 
       - name: 🧼 Clean Old Builds
         run: rm -rf .buildozer bin
 
-      - name: 🔓 Set folder permissions for Docker user
-        run: sudo chmod -R a+rw .
-
-      - name: ⚙️ Build APK using Custom Docker Image (non-root)
+      - name: ⚙️ Build APK using Docker (non-root)
         run: |
           docker run --rm -v $PWD:/home/builder/app custom-buildozer \
             bash -c "
               cd /home/builder/app &&
-              buildozer android clean &&
               buildozer -v android release"
 
       - name: 📦 Upload APK Artifact
