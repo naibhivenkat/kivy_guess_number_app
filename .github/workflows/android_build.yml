@@ -1,86 +1,128 @@
-name: Build APK with python-for-android
+#name: Build APK with python-for-android
+#
+#on:
+#  push:
+#    branches:
+#      - "**"
+#  workflow_dispatch:
+#
+#jobs:
+#  build:
+#    runs-on: ubuntu-latest
+#
+#    env:
+#      ANDROID_HOME: ${{ github.workspace }}/android-sdk
+#      ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
+#      ANDROID_NDK_HOME: ${{ github.workspace }}/android-sdk/ndk/25.2.9519653
+#      GRADLE_OPTS: "-Xmx4g -Dorg.gradle.daemon=false"
+#      ORG_GRADLE_PROJECT_javaOpts: "-Xmx4g"
+#      JAVA_TOOL_OPTIONS: "-Xmx4g"
+#
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#
+#      - name: Set up Python
+#        uses: actions/setup-python@v5
+#        with:
+#          python-version: '3.11'
+#
+#      - name: Install OS Dependencies
+#        run: |
+#          sudo apt-get update
+#          sudo apt-get install -y \
+#            zip unzip openjdk-17-jdk python3-dev \
+#            clang cmake libffi-dev libssl-dev libgl1-mesa-dev \
+#            autoconf automake libtool pkg-config m4 texinfo \
+#            git wget
+#
+#      - name: Install Python Dependencies
+#        run: |
+#          pip install --upgrade pip
+#          pip install Cython==0.29.36 python-for-android==2024.1.21
+#
+#      - name: Setup Android SDK and NDK
+#        run: |
+#          export ANDROID_SDK_ROOT=$ANDROID_HOME
+#          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
+#          curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+#          unzip sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
+#          mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
+#          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+#          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+#          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+#          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
+#          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
+#            "platform-tools" \
+#            "platforms;android-34" \
+#            "build-tools;36.0.0" \
+#            "ndk;25.2.9519653"
+#
+##      - name: Clone and Build Kivy from Source
+##        run: |
+##          git clone --depth 1 https://github.com/kivy/kivy.git
+##          cd kivy
+##          python setup.py build_ext --inplace
+##          cd ..
+#
+#      - name: Make build script executable
+#        run: chmod +x build_android_apk.sh
+#
+#      - name: Remove pyproject.toml (non-package mode fix)
+#        run: rm -f pyproject.toml
+#
+##      - name: Run Docker build
+##        run: |
+##          docker run --rm -v $PWD:/app -w /app python:3.11-slim bash build_apk.sh
+#
+#
+#      - name: Debug APK Output
+#        run: ls -lh
+#
+#      - name: 📤 Upload APK directly
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: Guess_the_Number.apk
+#          path: Guess_the_Number.apk
+#          if-no-files-found: error
+
+name: Build Kivy APK with Buildozer (Docker)
 
 on:
   push:
-    branches:
-      - "**"
+    branches: ["**"]
   workflow_dispatch:
 
 jobs:
-  build:
+  build-apk:
     runs-on: ubuntu-latest
 
-    env:
-      ANDROID_HOME: ${{ github.workspace }}/android-sdk
-      ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
-      ANDROID_NDK_HOME: ${{ github.workspace }}/android-sdk/ndk/25.2.9519653
-      GRADLE_OPTS: "-Xmx4g -Dorg.gradle.daemon=false"
-      ORG_GRADLE_PROJECT_javaOpts: "-Xmx4g"
-      JAVA_TOOL_OPTIONS: "-Xmx4g"
-
-
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: 🧹 Clean workspace
+        run: |
+          rm -rf .buildozer bin
+
+      - name: 🐍 Set up Python for Buildozer
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.10'
 
-      - name: Install OS Dependencies
+      - name: 🐳 Build APK using Buildozer Docker image
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            zip unzip openjdk-17-jdk python3-dev \
-            clang cmake libffi-dev libssl-dev libgl1-mesa-dev \
-            autoconf automake libtool pkg-config m4 texinfo \
-            git wget
+          docker run --rm -v $PWD:/home/user/hostcwd \
+            kivy/buildozer \
+            bash -c "
+              cd /home/user/hostcwd &&
+              buildozer android clean &&
+              buildozer -v android release"
 
-      - name: Install Python Dependencies
-        run: |
-          pip install --upgrade pip
-          pip install Cython==0.29.36 python-for-android==2024.1.21
-
-      - name: Setup Android SDK and NDK
-        run: |
-          export ANDROID_SDK_ROOT=$ANDROID_HOME
-          mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-          curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-          unzip sdk-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
-          mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools $ANDROID_SDK_ROOT/cmdline-tools/latest
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
-            "platform-tools" \
-            "platforms;android-34" \
-            "build-tools;36.0.0" \
-            "ndk;25.2.9519653"
-
-      - name: Clone and Build Kivy from Source
-        run: |
-          git clone --depth 1 https://github.com/kivy/kivy.git
-          cd kivy
-          python setup.py build_ext --inplace
-          cd ..
-
-      - name: Make build script executable
-        run: chmod +x build_android_apk.sh
-
-      - name: Remove pyproject.toml (non-package mode fix)
-        run: rm -f pyproject.toml
-
-      - name: Run Docker build
-        run: |
-          docker run --rm -v $PWD:/app -w /app python:3.11-slim bash build_apk.sh
-      - name: Debug APK Output
-        run: ls -lh
-
-      - name: 📤 Upload APK directly
+      - name: 📦 Upload release APK
         uses: actions/upload-artifact@v4
         with:
-          name: Guess_the_Number.apk
-          path: Guess_the_Number.apk
-          if-no-files-found: error
+          name: Guess_The_Number_Release
+          path: bin/*.apk
+

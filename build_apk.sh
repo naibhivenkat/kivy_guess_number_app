@@ -31,19 +31,36 @@ $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
   'ndk;25.2.9519653'
 
 echo "== Building APK =="
+#python3 -m pythonforandroid.toolchain apk \
+#  --private . \
+#  --package=com.gtn.app \
+#  --name="Guess the Number" \
+#  --version=0.1 \
+#  --bootstrap=sdl2 \
+#  --requirements=python3,kivy \
+#  --arch=arm64-v8a \
+#  --dist_name=guessnumber_dist \
+#  --android_api=34 \
+#  --sdk_dir=$ANDROID_SDK_ROOT \
+#  --ndk_dir=$ANDROID_NDK_HOME \
+#  --no-byte-compile-python
 python3 -m pythonforandroid.toolchain apk \
   --private . \
   --package=com.gtn.app \
   --name="Guess the Number" \
   --version=0.1 \
   --bootstrap=sdl2 \
-  --requirements=python3,kivy \
+  --requirements=kivy \
   --arch=arm64-v8a \
   --dist_name=guessnumber_dist \
   --android_api=34 \
   --sdk_dir=$ANDROID_SDK_ROOT \
   --ndk_dir=$ANDROID_NDK_HOME \
-  --no-byte-compile-python
+  --release \
+  --strip \
+  --minimize-python \
+  --no-dependencies
+
 
 echo "== Copying APK to project root =="
 APK_PATH=$(find /root/.local/share/python-for-android/dists/ -name "*.apk" | head -n 1)
