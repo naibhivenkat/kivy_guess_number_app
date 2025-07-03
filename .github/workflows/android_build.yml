@@ -88,7 +88,7 @@
 #          if-no-files-found: error
 
 
-name: Build Kivy APK in Docker (working)
+name: Build APK with Buildozer Docker
 
 on:
   push:
@@ -103,19 +103,19 @@ jobs:
       - name: 📥 Checkout Code
         uses: actions/checkout@v3
 
-      - name: 🧹 Clean Workspace
+      - name: 🧹 Clean workspace
         run: rm -rf .buildozer bin
 
-      - name: 🛠️ Build APK using josephcrowell/kivy-buildozer
+      - name: 🛠️ Build APK with Buildozer Docker (cutecatc)
         run: |
           docker run --rm -v $PWD:/home/user/hostcwd \
-            josephcrowell/kivy-buildozer \
+            cutecatc/buildozer:latest \
             bash -c "
               cd /home/user/hostcwd &&
               buildozer android clean &&
               buildozer -v android release"
 
-      - name: 📦 Upload APK
+      - name: 📦 Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Guess_The_Number_Release
