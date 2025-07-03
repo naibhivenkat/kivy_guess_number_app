@@ -87,7 +87,7 @@
 #          path: Guess_the_Number.apk
 #          if-no-files-found: error
 
-name: Build Kivy APK with Buildozer (Docker)
+name: Build APK with Buildozer (Docker)
 
 on:
   push:
@@ -99,37 +99,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout code
+      - name: 📥 Checkout Code
         uses: actions/checkout@v3
 
       - name: 🧹 Clean workspace
         run: |
           rm -rf .buildozer bin
 
-      - name: 🐍 Set up Python for Buildozer
+      - name: 🐍 Set up Python (for internal tools if needed)
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: 🐳 Disable Docker BuildKit
-        run: echo 'DOCKER_BUILDKIT=0' >> $GITHUB_ENV
+      - name: 🐳 Disable Docker BuildKit (fixes cacheconfig error)
+        run: echo "DOCKER_BUILDKIT=0" >> $GITHUB_ENV
 
-      - name: 🐳 Pull Buildozer Docker image
-        run: docker pull kivy/buildozer:python3.10
+      - name: 🐳 Pull Buildozer Docker Image
+        run: docker pull kivy/buildozer:latest
 
-      - name: 🐳 Build APK using Buildozer Docker
+      - name: 🛠️ Build APK inside Docker
         run: |
           docker run --rm -v $PWD:/home/user/hostcwd \
-            kivy/buildozer:python3.10 \
+            kivy/buildozer:latest \
             bash -c "
               cd /home/user/hostcwd &&
               buildozer android clean &&
               buildozer -v android release"
-      
 
-      - name: 📦 Upload release APK
+      - name: 📦 Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Guess_The_Number_Release
           path: bin/*.apk
-

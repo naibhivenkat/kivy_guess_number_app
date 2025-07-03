@@ -1,3 +1,6 @@
 [app]
 p4a.local_recipes = ./recipes
-requirements = python3,kivy,libffi
+requirements = kivy
+android.arch = arm64-v8a
+android.api = 34
+log_level = 2
