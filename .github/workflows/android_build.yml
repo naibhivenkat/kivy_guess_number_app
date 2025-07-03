@@ -109,11 +109,11 @@ jobs:
       - name: 🧼 Clean Old Builds
         run: rm -rf .buildozer bin
 
-      - name: ⚙️ Build APK using Custom Docker Image
+      - name: ⚙️ Build APK using Custom Docker Image (non-root)
         run: |
-          docker run --rm -v $PWD:/home/user/app custom-buildozer \
+          docker run --rm -v $PWD:/home/builder/app custom-buildozer \
             bash -c "
-              cd /home/user/app &&
+              cd /home/builder/app &&
               buildozer android clean &&
               buildozer -v android release"
 

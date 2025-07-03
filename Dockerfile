@@ -16,7 +16,8 @@ RUN apt-get update && apt-get install -y \
     pip install --no-cache-dir buildozer cython==0.29.36 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Pre-download SDK tools to speed up
-RUN mkdir -p ~/.buildozer
+# Create a non-root user
+RUN useradd -ms /bin/bash builder
+USER builder
 
-WORKDIR /home/user/app
+WORKDIR /home/builder/app
