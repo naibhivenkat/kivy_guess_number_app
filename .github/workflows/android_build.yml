@@ -142,11 +142,11 @@ jobs:
           docker run --rm -v $PWD:/home/builder/app custom-buildozer \
             bash -c "
               cd /home/builder/app &&
-              TOOLS_PATH=/home/builder/.buildozer/android/platform/android-sdk/tools &&
-              if [ -e \$TOOLS_PATH ]; then rm -rf \$TOOLS_PATH; fi &&
               mkdir -p /home/builder/.buildozer/android/platform/android-sdk/cmdline-tools &&
-              ln -s /home/builder/.buildozer/android/platform/android-sdk/cmdline-tools/latest \$TOOLS_PATH &&
+              ln -sf /home/builder/.buildozer/android/platform/android-sdk/cmdline-tools/latest \
+                     /home/builder/.buildozer/android/platform/android-sdk/tools &&
               buildozer -v android release"
+      
       
       
 
